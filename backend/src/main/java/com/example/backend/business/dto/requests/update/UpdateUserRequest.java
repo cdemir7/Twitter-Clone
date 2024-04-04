@@ -14,7 +14,10 @@ import org.hibernate.validator.constraints.Length;
 public class UpdateUserRequest {
     @NotBlank
     @Length(max = 50, message = "İsim alanı 50 karakterden fazla olamaz.")
-    private String name;
+    private String username;
+
+    @NotBlank
+    private String password;
 
     private String description;
 
