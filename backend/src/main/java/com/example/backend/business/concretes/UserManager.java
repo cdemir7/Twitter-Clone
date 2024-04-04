@@ -7,6 +7,7 @@ import com.example.backend.business.dto.responses.create.CreateUserResponse;
 import com.example.backend.business.dto.responses.get.GetAllUsersResponse;
 import com.example.backend.business.dto.responses.get.GetUserResponse;
 import com.example.backend.business.dto.responses.update.UpdateUserResponse;
+import com.example.backend.business.rules.UserBusinessRules;
 import com.example.backend.entities.User;
 import com.example.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.List;
 public class UserManager implements UserService {
     private final UserRepository repository;
     private final ModelMapper mapper;
+    private final UserBusinessRules rules;
     @Override
     public List<GetAllUsersResponse> getAll() {
         List<User> users = repository.findAll();
@@ -34,6 +36,7 @@ public class UserManager implements UserService {
 
     @Override
     public GetUserResponse getById(int id) {
+        rules.checkIfUserExistsById(id);
         User user = repository.findById(id).orElseThrow();
         GetUserResponse response = mapper.map(user, GetUserResponse.class);
 
@@ -42,6 +45,8 @@ public class UserManager implements UserService {
 
     @Override
     public CreateUserResponse add(CreateUserRequest request) {
+        rules.checkIfUserExistsByPhoneNumber(request.getPhoneNumber());
+        rules.checkIfUserExistsByEmailAddress(request.getEmailAddress());
         User user = mapper.map(request, User.class);
         user.setId(0);
         User createdUser = repository.save(user);
@@ -53,6 +58,9 @@ public class UserManager implements UserService {
 
     @Override
     public UpdateUserResponse update(int id, UpdateUserRequest request) {
+        rules.checkIfUserExistsById(id);
+        rules.checkIfUserExistsByPhoneNumber(request.getPhoneNumber());
+        rules.checkIfUserExistsByEmailAddress(request.getEmailAddress());
         User user = mapper.map(request, User.class);
         user.setId(id);
         User updatedUser = repository.save(user);
@@ -64,6 +72,7 @@ public class UserManager implements UserService {
 
     @Override
     public void delete(int id) {
+        rules.checkIfUserExistsById(id);
         repository.deleteById(id);
     }
 }
